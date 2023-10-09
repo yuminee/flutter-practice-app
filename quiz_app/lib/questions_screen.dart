@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:quiz_app/answer_button.dart';
 import 'package:quiz_app/data/questions.dart';
 
 class QuestionsScreen extends StatefulWidget {
-  const QuestionsScreen({super.key});
+  const QuestionsScreen({super.key, required this.onSelectAnswer});
+
+  final void Function(String answer) onSelectAnswer;
 
   @override
   State<QuestionsScreen> createState() {
@@ -13,39 +16,48 @@ class QuestionsScreen extends StatefulWidget {
 }
 
 class _QuestionsScreenState extends State<QuestionsScreen> {
+  int currentQuestionIndex = 0;
+
+  void answerQuestion(String selectedAnswer) {
+    widget.onSelectAnswer(selectedAnswer);
+    // setState안에서 값을 변경해줘야, flutter에서 build method를 다시 executed함
+    setState(() {
+      currentQuestionIndex++;
+    });
+  }
+
   @override
   Widget build(context) {
-    final currentQuestion = questions[0];
+    final currentQuestion = questions[currentQuestionIndex];
 
     return SizedBox(
       width: double.infinity, //use as much as you can.
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            currentQuestion.text,
-            style: const TextStyle(color: Colors.white, fontSize: 30),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          AnswerButton(
-            answerText: currentQuestion.answers[0],
-            onTap: () {},
-          ),
-          AnswerButton(
-            answerText: currentQuestion.answers[1],
-            onTap: () {},
-          ),
-          AnswerButton(
-            answerText: currentQuestion.answers[2],
-            onTap: () {},
-          ),
-          AnswerButton(
-            answerText: currentQuestion.answers[3],
-            onTap: () {},
-          ),
-        ],
+      child: Container(
+        margin: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              currentQuestion.text,
+              style: GoogleFonts.lato(
+                  color: const Color.fromARGB(255, 231, 190, 246),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            ...currentQuestion.shuffledAnswers.map((answer) {
+              return AnswerButton(
+                  answerText: answer,
+                  onTap: () {
+                    answerQuestion(answer);
+                  });
+            })
+          ],
+        ),
       ),
     );
   }
